@@ -1,0 +1,54 @@
+# requirements.txt
+# Secure File Encryptor with Dropbox & Telegram Integration
+# Version 2.0
+
+# Core encryption - REQUIRED
+cryptography==41.0.7
+# Provides AES-256 encryption via Fernet and PBKDF2 key derivation
+
+# Cloud storage - OPTIONAL (for Dropbox features)
+dropbox==11.36.2
+# Official Dropbox SDK for file uploads/downloads
+
+# Telegram integration - OPTIONAL (for bot features)
+requests==2.31.0
+# HTTP library for Telegram API communication
+
+# User interface - OPTIONAL (for colored console output)
+colorama==0.4.6
+# Cross-platform colored terminal text
+
+# Clipboard support - OPTIONAL (for auto-copy links)
+pyperclip==1.8.2
+# Cross-platform clipboard operations
+
+# Development tools - OPTIONAL (for testing)
+pytest==7.4.3
+pytest-cov==4.1.0
+# Testing framework and coverage reporting
+
+# Security tools - OPTIONAL (for additional security)
+python-dotenv==1.0.0
+# Environment variable management (for API keys)
+
+# ============================================================================
+# Installation Instructions
+# ============================================================================
+# 
+# Basic installation (core features only):
+#   pip install cryptography
+#
+# Full installation (all features):
+#   pip install -r requirements.txt
+#
+# Development installation (with testing tools):
+#   pip install -r requirements-dev.txt
+#
+# ============================================================================
+# Version Compatibility
+# ============================================================================
+#
+# Python 3.8 - 3.12 supported
+# Windows, macOS, Linux supported
+#
+# ============================================================================
