@@ -1,81 +1,78 @@
+#!/usr/bin/env python3
 import os
 import secrets
+import logging
+from pathlib import Path
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 
-class FileEncryptor:
+# 1. Logging Setup (Crucial for Portfolio)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
+class SecureVault:
     """
-    Enterprise-grade encryption using AES-256-GCM.
-    Implements streaming to handle files of any size with minimal memory footprint.
+    High-performance vault using AES-256-GCM.
+    Suitable for Tovah Advisory enterprise automation.
     """
-    CHUNKS_SIZE = 64 * 1024  # 64KB chunks for optimal throughput
+    ITERATIONS = 100_000
     SALT_SIZE = 16
-    NONCE_SIZE = 12         # Standard for AES-GCM
+    NONCE_SIZE = 12
 
-    def __init__(self, ui):
-        self.ui = ui
-        self.master_key = None
+    def __init__(self, password: str):
+        self.password = password
 
-    def _derive_key(self, password: str, salt: bytes) -> bytes:
-        """Derives a high-entropy 256-bit key."""
+    def _get_key(self, salt: bytes) -> bytes:
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
             salt=salt,
-            iterations=100_000, # Industry standard for PBKDF2
+            iterations=self.ITERATIONS,
         )
-        return kdf.derive(password.encode())
+        return kdf.derive(self.password.encode())
 
-    def encrypt_file(self, input_path: Path, password: str = None) -> Path:
-        """
-        Encrypts a file and prepends metadata (Salt + Nonce).
-        Format: [16 bytes Salt][12 bytes Nonce][Encrypted Data...]
-        """
-        output_path = input_path.with_suffix(input_path.suffix + '.enc')
+    def encrypt(self, file_path: str):
+        path = Path(file_path)
         salt = secrets.token_bytes(self.SALT_SIZE)
         nonce = secrets.token_bytes(self.NONCE_SIZE)
-        
-        # Determine key source
-        key = self._derive_key(password, salt) if password else self.master_key
+        key = self._get_key(salt)
         aesgcm = AESGCM(key)
 
-        with open(input_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
-            # 1. Write metadata first
-            f_out.write(salt)
-            f_out.write(nonce)
-            
-            # 2. Stream and Encrypt
-            while True:
-                chunk = f_in.read(self.CHUNKS_SIZE)
-                if not chunk:
-                    break
-                # AES-GCM tag is bundled with the ciphertext
-                encrypted_chunk = aesgcm.encrypt(nonce, chunk, None)
-                f_out.write(encrypted_chunk)
+        with open(path, 'rb') as f:
+            data = f.read()
         
+        # Encrypt the whole block for reliability
+        ciphertext = aesgcm.encrypt(nonce, data, None)
+        
+        output_path = path.with_suffix('.enc')
+        with open(output_path, 'wb') as f:
+            f.write(salt + nonce + ciphertext)
+        
+        logger.info(f"✅ Encrypted: {output_path.name}")
         return output_path
 
-    def decrypt_file(self, input_path: Path, password: str = None) -> Path:
-        """
-        Stream decrypts using metadata stored in the file header.
-        """
-        output_path = input_path.with_name(input_path.name.replace('.enc', '.dec'))
+    def decrypt(self, file_path: str):
+        path = Path(file_path)
+        with open(path, 'rb') as f:
+            salt = f.read(self.SALT_SIZE)
+            nonce = f.read(self.NONCE_SIZE)
+            ciphertext = f.read()
+
+        key = self._get_key(salt)
+        aesgcm = AESGCM(key)
         
-        with open(input_path, 'rb') as f_in:
-            salt = f_in.read(self.SALT_SIZE)
-            nonce = f_in.read(self.NONCE_SIZE)
-            
-            key = self._derive_key(password, salt) if password else self.master_key
-            aesgcm = AESGCM(key)
-            
-            with open(output_path, 'wb') as f_out:
-                while True:
-                    # Note: AES-GCM appends a 16-byte tag to each chunk
-                    chunk = f_in.read(self.CHUNKS_SIZE + 16)
-                    if not chunk:
-                        break
-                    decrypted_chunk = aesgcm.decrypt(nonce, chunk, None)
-                    f_out.write(decrypted_chunk)
-                    
-        return output_path
+        try:
+            decrypted_data = aesgcm.decrypt(nonce, ciphertext, None)
+            output_path = path.with_name(path.stem + "_restored" + path.suffix.replace('.enc', ''))
+            with open(output_path, 'wb') as f:
+                f.write(decrypted_data)
+            logger.info(f"🔓 Decrypted: {output_path.name}")
+            return output_path
+        except Exception as e:
+            logger.error("❌ Decryption failed: Check your password or file integrity.")
+            return None
+
+# Quick Test Usage:
+# vault = SecureVault("YourSecretPassword")
+# vault.encrypt("my_report.pdf")
