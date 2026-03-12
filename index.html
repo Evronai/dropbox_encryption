@@ -1,0 +1,344 @@
+
+## 2. GitHub Pages index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure File Encryptor - Encrypt Files with Dropbox & Telegram</title>
+    <meta name="description" content="A powerful, secure file encryption tool with Dropbox cloud storage and interactive Telegram bot integration.">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Secure File Encryptor">
+    <meta property="og:description" content="Encrypt files securely and upload to Dropbox with Telegram bot integration">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://YOURUSERNAME.github.io/secure-file-encryptor/">
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .feature-card {
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .code-block {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-purple-600 text-2xl mr-3"></i>
+                    <span class="font-bold text-xl text-gray-800">SecureFileEncryptor</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#features" class="text-gray-600 hover:text-purple-600 px-3 py-2">Features</a>
+                    <a href="#installation" class="text-gray-600 hover:text-purple-600 px-3 py-2">Installation</a>
+                    <a href="#usage" class="text-gray-600 hover:text-purple-600 px-3 py-2">Usage</a>
+                    <a href="https://github.com/YOURUSERNAME/secure-file-encryptor" class="text-gray-600 hover:text-purple-600">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="gradient-bg text-white pt-24 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-6">Secure File Encryption</h1>
+                <p class="text-xl mb-8 max-w-3xl mx-auto">
+                    Military-grade encryption for your files with seamless Dropbox integration 
+                    and an interactive Telegram bot. Keep your data safe, anywhere.
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#installation" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                        <i class="fas fa-download mr-2"></i>Get Started
+                    </a>
+                    <a href="https://github.com/YOURUSERNAME/secure-file-encryptor" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
+                        <i class="fab fa-github mr-2"></i>GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="bg-white py-12 shadow-inner">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-bold text-purple-600">AES-256</div>
+                    <div class="text-gray-600">Encryption Standard</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-purple-600">3</div>
+                    <div class="text-gray-600">Integration Platforms</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-purple-600">100%</div>
+                    <div class="text-gray-600">Open Source</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div id="features" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">Powerful Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">AES-256 Encryption</h3>
+                    <p class="text-gray-600">Military-grade encryption using Fernet (symmetric encryption) with PBKDF2 key derivation.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Dropbox Integration</h3>
+                    <p class="text-gray-600">Automatic upload to Dropbox with shareable links. Chunked upload for large files.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Telegram Bot</h3>
+                    <p class="text-gray-600">Interactive bot with inline buttons. Encrypt/decrypt files directly from Telegram.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Dual Encryption Modes</h3>
+                    <p class="text-gray-600">Master key for convenience or password-based with unique salt per file.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-clipboard"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Auto Link Copying</h3>
+                    <p class="text-gray-600">Shareable links automatically copied to your clipboard after upload.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Beautiful CLI</h3>
+                    <p class="text-gray-600">Colorful, intuitive command-line interface with clear menus and feedback.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Installation Section -->
+    <div id="installation" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">Quick Installation</h2>
+            
+            <div class="bg-gray-900 rounded-lg p-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-terminal text-green-400 text-xl mr-3"></i>
+                    <span class="text-green-400 font-mono">pip install -r requirements.txt</span>
+                </div>
+                <div class="code-block">
+                    <span class="text-green-400">$</span> git clone https://github.com/YOURUSERNAME/secure-file-encryptor.git<br>
+                    <span class="text-green-400">$</span> cd secure-file-encryptor<br>
+                    <span class="text-green-400">$</span> pip install -r requirements.txt<br>
+                    <span class="text-green-400">$</span> python secure_encryptor.py
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <i class="fab fa-windows text-3xl text-blue-600 mb-2"></i>
+                    <p class="font-semibold">Windows</p>
+                    <p class="text-sm text-gray-600">Python 3.8+</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <i class="fab fa-apple text-3xl text-gray-800 mb-2"></i>
+                    <p class="font-semibold">macOS</p>
+                    <p class="text-sm text-gray-600">Python 3.8+</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <i class="fab fa-linux text-3xl text-yellow-600 mb-2"></i>
+                    <p class="font-semibold">Linux</p>
+                    <p class="text-sm text-gray-600">Python 3.8+</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Section -->
+    <div id="usage" class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">Quick Usage Examples</h2>
+            
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">🔑 Generate Master Key</h3>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
+                        python secure_encryptor.py generate-key
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">🔒 Encrypt a File</h3>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
+                        python secure_encryptor.py encrypt secret.pdf --upload
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">🤖 Start Telegram Bot</h3>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
+                        python secure_encryptor.py bot --bot-only
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">⚙️ Configure Services</h3>
+                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
+                        python secure_encryptor.py config
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Telegram Bot Preview -->
+    <div class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12">Interactive Telegram Bot</h2>
+            
+            <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-8 text-white">
+                <div class="flex items-center mb-6">
+                    <i class="fab fa-telegram text-5xl mr-4"></i>
+                    <div>
+                        <h3 class="text-2xl font-bold">@SecureEncryptorBot</h3>
+                        <p>Try it now on Telegram!</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white/20 rounded-lg p-3 text-center">
+                        <i class="fas fa-lock text-2xl mb-2"></i>
+                        <p class="text-sm">Encrypt</p>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-3 text-center">
+                        <i class="fas fa-unlock text-2xl mb-2"></i>
+                        <p class="text-sm">Decrypt</p>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-3 text-center">
+                        <i class="fas fa-cloud text-2xl mb-2"></i>
+                        <p class="text-sm">Dropbox</p>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-3 text-center">
+                        <i class="fas fa-cog text-2xl mb-2"></i>
+                        <p class="text-sm">Settings</p>
+                    </div>
+                </div>
+                
+                <div class="bg-black/30 rounded-lg p-4 font-mono text-sm">
+                    > /start<br>
+                    > 🔒 Send file to encrypt<br>
+                    > 🔑 Choose encryption method<br>
+                    > ✅ File encrypted! Upload to Dropbox?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="gradient-bg text-white py-20">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <h2 class="text-3xl font-bold mb-6">Ready to Secure Your Files?</h2>
+            <p class="text-xl mb-8">Get started with military-grade encryption today.</p>
+            <div class="flex justify-center space-x-4">
+                <a href="https://github.com/YOURUSERNAME/secure-file-encryptor/archive/refs/heads/main.zip" 
+                   class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    <i class="fas fa-download mr-2"></i>Download Now
+                </a>
+                <a href="https://github.com/YOURUSERNAME/secure-file-encryptor" 
+                   class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
+                    <i class="fab fa-github mr-2"></i>View Source
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="font-bold mb-4">SecureFileEncryptor</h4>
+                    <p class="text-gray-400 text-sm">Military-grade encryption for everyone.</p>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Links</h5>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#features" class="hover:text-white">Features</a></li>
+                        <li><a href="#installation" class="hover:text-white">Installation</a></li>
+                        <li><a href="#usage" class="hover:text-white">Usage</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Community</h5>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="https://github.com/YOURUSERNAME/secure-file-encryptor/issues" class="hover:text-white">Issues</a></li>
+                        <li><a href="https://github.com/YOURUSERNAME/secure-file-encryptor/pulls" class="hover:text-white">Pull Requests</a></li>
+                        <li><a href="#" class="hover:text-white">Discussions</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Legal</h5>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white">MIT License</a></li>
+                        <li><a href="#" class="hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="hover:text-white">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2024 Secure File Encryptor. Made with ❤️ for the open-source community.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
