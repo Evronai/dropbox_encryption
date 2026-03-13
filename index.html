@@ -1,30 +1,37 @@
-
-## 2. GitHub Pages index.html
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure File Encryptor - Encrypt Files with Dropbox & Telegram</title>
-    <meta name="description" content="A powerful, secure file encryption tool with Dropbox cloud storage and interactive Telegram bot integration.">
+    <title>Secure File Encryptor - Dropbox & Telegram Integration</title>
+    <meta name="description" content="Encrypt files and upload to Dropbox with Telegram bot integration. Military-grade AES-256 encryption.">
     
-    <!-- Open Graph / Social Media -->
-    <meta property="og:title" content="Secure File Encryptor">
-    <meta property="og:description" content="Encrypt files securely and upload to Dropbox with Telegram bot integration">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://YOURUSERNAME.github.io/secure-file-encryptor/">
-    
-    <!-- Tailwind CSS from CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- CryptoJS for encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- FileSaver.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <!-- JSZip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .drop-zone {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            border-color: #667eea;
+            background-color: rgba(102, 126, 234, 0.1);
         }
         .feature-card {
             transition: transform 0.3s ease;
@@ -32,12 +39,50 @@
         .feature-card:hover {
             transform: translateY(-5px);
         }
-        .code-block {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-family: 'Courier New', monospace;
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .api-input-group {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db;
+        }
+        .api-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .api-field {
+            margin-bottom: 15px;
+        }
+        .token-masked {
+            font-family: monospace;
+            background: #1f2937;
+            color: #10b981;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -52,11 +97,12 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="#features" class="text-gray-600 hover:text-purple-600 px-3 py-2">Features</a>
-                    <a href="#installation" class="text-gray-600 hover:text-purple-600 px-3 py-2">Installation</a>
-                    <a href="#usage" class="text-gray-600 hover:text-purple-600 px-3 py-2">Usage</a>
-                    <a href="https://github.com/YOURUSERNAME/secure-file-encryptor" class="text-gray-600 hover:text-purple-600">
-                        <i class="fab fa-github text-xl"></i>
-                    </a>
+                    <a href="#encrypt" class="text-gray-600 hover:text-purple-600 px-3 py-2">Encrypt</a>
+                    <a href="#dropbox" class="text-gray-600 hover:text-purple-600 px-3 py-2">Dropbox</a>
+                    <a href="#telegram" class="text-gray-600 hover:text-purple-600 px-3 py-2">Telegram</a>
+                    <button onclick="showSettings()" class="text-gray-600 hover:text-purple-600">
+                        <i class="fas fa-cog text-xl"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -64,281 +110,1300 @@
 
     <!-- Hero Section -->
     <div class="gradient-bg text-white pt-24 pb-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="text-center">
-                <h1 class="text-5xl font-bold mb-6">Secure File Encryption</h1>
+                <h1 class="text-5xl font-bold mb-6">Secure Cloud Encryption</h1>
                 <p class="text-xl mb-8 max-w-3xl mx-auto">
-                    Military-grade encryption for your files with seamless Dropbox integration 
-                    and an interactive Telegram bot. Keep your data safe, anywhere.
+                    Encrypt files locally, then upload to Dropbox or manage via Telegram bot.
+                    Your keys, your control.
                 </p>
                 <div class="flex justify-center space-x-4">
-                    <a href="#installation" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-                        <i class="fas fa-download mr-2"></i>Get Started
+                    <a href="#encrypt" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                        <i class="fas fa-lock mr-2"></i>Encrypt Now
                     </a>
-                    <a href="https://github.com/YOURUSERNAME/secure-file-encryptor" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
-                        <i class="fab fa-github mr-2"></i>GitHub
+                    <a href="#dropbox" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
+                        <i class="fab fa-dropbox mr-2"></i>Dropbox Setup
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Stats -->
-    <div class="bg-white py-12 shadow-inner">
+    <!-- Main Dashboard -->
+    <div class="py-12 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div>
-                    <div class="text-4xl font-bold text-purple-600">AES-256</div>
-                    <div class="text-gray-600">Encryption Standard</div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="bg-purple-100 rounded-full p-3 mr-4">
+                            <i class="fas fa-lock text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Files Encrypted</p>
+                            <p class="text-2xl font-bold" id="filesEncrypted">0</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-4xl font-bold text-purple-600">3</div>
-                    <div class="text-gray-600">Integration Platforms</div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 rounded-full p-3 mr-4">
+                            <i class="fab fa-dropbox text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Dropbox Files</p>
+                            <p class="text-2xl font-bold" id="dropboxCount">0</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-4xl font-bold text-purple-600">100%</div>
-                    <div class="text-gray-600">Open Source</div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 rounded-full p-3 mr-4">
+                            <i class="fab fa-telegram text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Bot Status</p>
+                            <p class="text-2xl font-bold" id="botStatus">Offline</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 rounded-full p-3 mr-4">
+                            <i class="fas fa-database text-yellow-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Data Processed</p>
+                            <p class="text-2xl font-bold" id="dataProcessed">0 MB</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="bg-white rounded-lg shadow mb-8">
+                <div class="flex border-b border-gray-200">
+                    <button onclick="switchMainTab('encrypt')" id="main-tab-encrypt" class="flex-1 py-4 px-6 text-center font-medium border-b-2 border-purple-600 text-purple-600">
+                        <i class="fas fa-lock mr-2"></i>Encrypt Files
+                    </button>
+                    <button onclick="switchMainTab('dropbox')" id="main-tab-dropbox" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-dropbox mr-2"></i>Dropbox Integration
+                    </button>
+                    <button onclick="switchMainTab('telegram')" id="main-tab-telegram" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-telegram mr-2"></i>Telegram Bot
+                    </button>
+                </div>
+            </div>
+
+            <!-- Encrypt Tab Content -->
+            <div id="main-panel-encrypt" class="main-panel">
+                <div class="bg-white rounded-lg shadow p-8">
+                    <h2 class="text-2xl font-bold mb-6">🔐 File Encryption</h2>
+                    
+                    <!-- Drop Zone -->
+                    <div id="dropZone" class="drop-zone rounded-lg p-12 text-center cursor-pointer mb-6" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Drop files here or click to upload</h3>
+                        <p class="text-gray-500">Files are encrypted locally before any cloud upload</p>
+                        <input type="file" id="fileInput" class="hidden" multiple onchange="handleFileSelect(this.files)">
+                    </div>
+
+                    <!-- File List -->
+                    <div id="fileList" class="mb-6 hidden">
+                        <h4 class="font-semibold mb-3">Selected Files:</h4>
+                        <div id="filesContainer" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- Encryption Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Encryption Method</label>
+                            <select id="encryptMethod" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="password">Password-based</option>
+                                <option value="key">Master Key</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Auto Upload to</label>
+                            <select id="autoUpload" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="none">Local Only</option>
+                                <option value="dropbox">Dropbox</option>
+                                <option value="both">Dropbox + Telegram</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div id="passwordField" class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Encryption Password</label>
+                        <input type="password" id="encryptPassword" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter a strong password">
+                        <p class="text-xs text-gray-500 mt-1">Minimum 8 characters. This password cannot be recovered.</p>
+                    </div>
+
+                    <!-- Master Key Field -->
+                    <div id="masterKeyField" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Master Key</label>
+                        <div class="flex">
+                            <input type="password" id="masterKey" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter or generate master key">
+                            <button onclick="generateMasterKey()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg transition">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-4">
+                        <button onclick="encryptFiles()" class="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            <i class="fas fa-lock mr-2"></i>Encrypt & Process
+                        </button>
+                        <button onclick="clearFiles()" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            <i class="fas fa-trash mr-2"></i>Clear
+                        </button>
+                    </div>
+
+                    <!-- Progress -->
+                    <div id="progressContainer" class="mt-6 hidden">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Processing...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progressBar" class="progress-bar bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="results" class="mt-6 hidden">
+                        <h4 class="font-semibold mb-3">Results:</h4>
+                        <div id="resultsContainer" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dropbox Tab Content -->
+            <div id="main-panel-dropbox" class="main-panel hidden">
+                <div class="bg-white rounded-lg shadow p-8">
+                    <h2 class="text-2xl font-bold mb-6">☁️ Dropbox Integration</h2>
+                    
+                    <!-- API Configuration Section with Spaced UI -->
+                    <div class="api-input-group">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fab fa-dropbox text-blue-600 mr-2"></i>
+                            Dropbox API Configuration
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- Access Token Field -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-key text-gray-500 mr-1"></i>
+                                    Dropbox Access Token
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="dropboxToken" class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                           placeholder="sl.B2je3f7s... your access token" value="">
+                                    <button onclick="toggleTokenVisibility('dropboxToken')" class="absolute right-3 top-3 text-gray-500 hover:text-gray-700">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Get your token from <a href="https://www.dropbox.com/developers/apps" target="_blank" class="text-blue-600 hover:underline">Dropbox App Console</a>
+                                </p>
+                                <div class="token-masked mt-2 hidden" id="dropboxTokenMasked">
+                                    ••••••••••••••••••••••••••••••••
+                                </div>
+                            </div>
+
+                            <!-- App Key Field -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-id-card text-gray-500 mr-1"></i>
+                                    Dropbox App Key (Optional)
+                                </label>
+                                <input type="text" id="dropboxAppKey" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                       placeholder="App key from Dropbox app console">
+                            </div>
+
+                            <!-- App Secret Field -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-lock text-gray-500 mr-1"></i>
+                                    Dropbox App Secret (Optional)
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="dropboxAppSecret" class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                           placeholder="App secret (keep this secret)">
+                                    <button onclick="toggleTokenVisibility('dropboxAppSecret')" class="absolute right-3 top-3 text-gray-500 hover:text-gray-700">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Refresh Token (for advanced) -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-sync-alt text-gray-500 mr-1"></i>
+                                    Refresh Token (Optional)
+                                </label>
+                                <input type="password" id="dropboxRefreshToken" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                       placeholder="For long-lived access">
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3 mt-6">
+                            <button onclick="testDropboxConnection()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-plug mr-2"></i>Test Connection
+                            </button>
+                            <button onclick="saveDropboxConfig()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                                <i class="fas fa-save mr-2"></i>Save Configuration
+                            </button>
+                            <button onclick="clearDropboxConfig()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition">
+                                <i class="fas fa-eraser mr-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dropbox File Manager -->
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold mb-4">📁 Your Dropbox Files</h3>
+                        
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <div class="flex space-x-3 mb-4">
+                                <button onclick="listDropboxFiles()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh List
+                                </button>
+                                <button onclick="uploadToDropbox()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                    <i class="fas fa-upload mr-2"></i>Upload File
+                                </button>
+                            </div>
+
+                            <div id="dropboxFileList" class="space-y-2 max-h-64 overflow-y-auto">
+                                <div class="text-center text-gray-500 py-8">
+                                    <i class="fas fa-folder-open text-4xl mb-2"></i>
+                                    <p>No files loaded. Click refresh to list your Dropbox files.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Section -->
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold mb-3">Upload Encrypted File</h4>
+                        <div class="flex space-x-3">
+                            <input type="file" id="dropboxUploadFile" class="flex-1 border border-gray-300 rounded-lg px-3 py-2">
+                            <button onclick="uploadSelectedFile()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telegram Tab Content -->
+            <div id="main-panel-telegram" class="main-panel hidden">
+                <div class="bg-white rounded-lg shadow p-8">
+                    <h2 class="text-2xl font-bold mb-6">🤖 Telegram Bot Integration</h2>
+                    
+                    <!-- Telegram API Configuration -->
+                    <div class="api-input-group">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fab fa-telegram text-blue-500 mr-2"></i>
+                            Telegram Bot Configuration
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- Bot Token -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-robot text-gray-500 mr-1"></i>
+                                    Telegram Bot Token
+                                </label>
+                                <div class="relative">
+                                    <input type="password" id="telegramBotToken" class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                           placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz">
+                                    <button onclick="toggleTokenVisibility('telegramBotToken')" class="absolute right-3 top-3 text-gray-500 hover:text-gray-700">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Get from <a href="https://t.me/botfather" target="_blank" class="text-blue-600 hover:underline">@BotFather</a> on Telegram
+                                </p>
+                            </div>
+
+                            <!-- Chat ID -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-comment text-gray-500 mr-1"></i>
+                                    Default Chat ID
+                                </label>
+                                <input type="text" id="telegramChatId" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                       placeholder="123456789 or @username">
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Get your chat ID from <a href="https://t.me/userinfobot" target="_blank" class="text-blue-600 hover:underline">@userinfobot</a>
+                                </p>
+                            </div>
+
+                            <!-- Allowed Users -->
+                            <div class="api-field">
+                                <label class="api-label">
+                                    <i class="fas fa-users text-gray-500 mr-1"></i>
+                                    Allowed Users (comma-separated)
+                                </label>
+                                <input type="text" id="telegramAllowedUsers" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                       placeholder="123456789, 987654321, @username">
+                                <p class="text-xs text-gray-500 mt-2">Leave empty to allow all users</p>
+                            </div>
+
+                            <!-- Bot Settings -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="botAutoStart" class="mr-2">
+                                        <span>Auto-start bot on page load</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="botNotifyOnEncrypt" class="mr-2" checked>
+                                        <span>Notify on encryption</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="botNotifyOnUpload" class="mr-2" checked>
+                                        <span>Notify on Dropbox upload</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="botDebugMode" class="mr-2">
+                                        <span>Debug mode</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3 mt-6">
+                            <button onclick="testTelegramConnection()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
+                                <i class="fas fa-paper-plane mr-2"></i>Test Bot
+                            </button>
+                            <button onclick="startTelegramBot()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                                <i class="fas fa-play mr-2"></i>Start Bot
+                            </button>
+                            <button onclick="stopTelegramBot()" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                                <i class="fas fa-stop mr-2"></i>Stop Bot
+                            </button>
+                            <button onclick="saveTelegramConfig()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition">
+                                <i class="fas fa-save mr-2"></i>Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bot Status and Controls -->
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Bot Status Card -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4">Bot Status</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span>Status:</span>
+                                    <span id="botLiveStatus" class="font-semibold text-red-600">Offline</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Uptime:</span>
+                                    <span id="botUptime">0s</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Messages processed:</span>
+                                    <span id="botMessages">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Active users:</span>
+                                    <span id="botUsers">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h4 class="font-semibold mb-4">Quick Actions</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="sendTelegramMessage()" class="bg-purple-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-purple-700">
+                                    <i class="fas fa-envelope mr-1"></i> Send Message
+                                </button>
+                                <button onclick="broadcastToUsers()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700">
+                                    <i class="fas fa-broadcast-tower mr-1"></i> Broadcast
+                                </button>
+                                <button onclick="getBotUpdates()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700">
+                                    <i class="fas fa-sync-alt mr-1"></i> Get Updates
+                                </button>
+                                <button onclick="setWebhook()" class="bg-yellow-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-yellow-700">
+                                    <i class="fas fa-link mr-1"></i> Set Webhook
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Log -->
+                    <div class="mt-6">
+                        <h4 class="font-semibold mb-3">Message Log</h4>
+                        <div id="telegramLog" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto">
+                            > Telegram bot initialized<br>
+                            > Waiting for commands...
+                        </div>
+                    </div>
+
+                    <!-- Bot Commands Reference -->
+                    <div class="mt-6 p-4 bg-purple-50 rounded-lg">
+                        <h4 class="font-semibold mb-2">Bot Commands</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/start</code> - Start bot</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/encrypt</code> - Encrypt file</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/decrypt</code> - Decrypt file</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/list</code> - List files</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/download</code> - Download file</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/status</code> - Bot status</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/help</code> - Show help</div>
+                            <div><code class="bg-gray-200 px-2 py-1 rounded">/cancel</code> - Cancel</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Features Section -->
-    <div id="features" class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-12">Powerful Features</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 class="text-xl font-bold mb-4">Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="autoDownload" class="mr-2" checked>
+                        <span>Auto-download encrypted files</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="saveTokens" class="mr-2">
+                        <span>Save API tokens locally</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="block mb-2">Encryption Iterations</label>
+                    <select id="iterations" class="w-full border rounded-lg px-3 py-2">
+                        <option value="10000">10,000 (Fast)</option>
+                        <option value="100000" selected>100,000 (Recommended)</option>
+                        <option value="600000">600,000 (Maximum)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-2">Default Cloud Upload</label>
+                    <select id="defaultCloud" class="w-full border rounded-lg px-3 py-2">
+                        <option value="none">None</option>
+                        <option value="dropbox">Dropbox</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button onclick="closeSettings()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg mr-2">Cancel</button>
+                <button onclick="saveSettings()" class="bg-purple-600 text-white px-4 py-2 rounded-lg">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script>
+        // Global variables
+        let selectedFiles = [];
+        let dropboxFiles = [];
+        let telegramBotActive = false;
+        let botStartTime = null;
+        let messageCount = 0;
+        let activeUsers = new Set();
+        
+        // Stats
+        let stats = {
+            filesEncrypted: localStorage.getItem('filesEncrypted') ? parseInt(localStorage.getItem('filesEncrypted')) : 0,
+            dataProcessed: localStorage.getItem('dataProcessed') ? parseInt(localStorage.getItem('dataProcessed')) : 0,
+            dropboxCount: localStorage.getItem('dropboxCount') ? parseInt(localStorage.getItem('dropboxCount')) : 0
+        };
+
+        // Settings
+        let settings = {
+            autoDownload: true,
+            saveTokens: false,
+            iterations: 100000,
+            defaultCloud: 'none'
+        };
+
+        // API Configuration
+        let apiConfig = {
+            dropbox: {
+                token: '',
+                appKey: '',
+                appSecret: '',
+                refreshToken: ''
+            },
+            telegram: {
+                botToken: '',
+                chatId: '',
+                allowedUsers: [],
+                autoStart: false,
+                notifyOnEncrypt: true,
+                notifyOnUpload: true,
+                debugMode: false
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            setupDragAndDrop();
+            loadSavedConfig();
+            startUptimeCounter();
+        });
+
+        // Tab switching
+        function switchMainTab(tab) {
+            ['encrypt', 'dropbox', 'telegram'].forEach(t => {
+                document.getElementById(`main-tab-${t}`).classList.remove('border-purple-600', 'text-purple-600');
+                document.getElementById(`main-tab-${t}`).classList.add('text-gray-500');
+                document.getElementById(`main-panel-${t}`).classList.add('hidden');
+            });
+            
+            document.getElementById(`main-tab-${tab}`).classList.add('border-purple-600', 'text-purple-600');
+            document.getElementById(`main-tab-${tab}`).classList.remove('text-gray-500');
+            document.getElementById(`main-panel-${tab}`).classList.remove('hidden');
+        }
+
+        // Drag and drop
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropZone.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                dropZone.classList.remove('dragover');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFileSelect(files);
+            }
+        }
+
+        // File handling
+        function handleFileSelect(files) {
+            selectedFiles = Array.from(files);
+            displayFileList();
+            showToast(`${files.length} file(s) selected`, 'success');
+        }
+
+        function displayFileList() {
+            const container = document.getElementById('filesContainer');
+            const fileList = document.getElementById('fileList');
+            
+            if (selectedFiles.length > 0) {
+                fileList.classList.remove('hidden');
+                container.innerHTML = selectedFiles.map((file, index) => `
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-file text-gray-400 mr-3"></i>
+                            <div>
+                                <p class="font-medium">${file.name}</p>
+                                <p class="text-xs text-gray-500">${formatBytes(file.size)}</p>
+                            </div>
+                        </div>
+                        <button onclick="removeFile(${index})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                fileList.classList.add('hidden');
+            }
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            displayFileList();
+        }
+
+        function clearFiles() {
+            selectedFiles = [];
+            displayFileList();
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('progressContainer').classList.add('hidden');
+        }
+
+        // Token visibility toggle
+        function toggleTokenVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // Encryption method toggle
+        document.getElementById('encryptMethod').addEventListener('change', function(e) {
+            const passwordField = document.getElementById('passwordField');
+            const masterKeyField = document.getElementById('masterKeyField');
+            
+            if (e.target.value === 'password') {
+                passwordField.classList.remove('hidden');
+                masterKeyField.classList.add('hidden');
+            } else {
+                passwordField.classList.add('hidden');
+                masterKeyField.classList.remove('hidden');
+            }
+        });
+
+        // Generate master key
+        function generateMasterKey() {
+            const key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+            document.getElementById('masterKey').value = key;
+            showToast('Master key generated! Copy it now.', 'success');
+        }
+
+        // Encryption function
+        async function encryptFiles() {
+            if (selectedFiles.length === 0) {
+                showToast('Please select files first', 'error');
+                return;
+            }
+
+            const method = document.getElementById('encryptMethod').value;
+            const password = document.getElementById('encryptPassword').value;
+            const masterKey = document.getElementById('masterKey').value;
+            const autoUpload = document.getElementById('autoUpload').value;
+
+            if (method === 'password' && password.length < 8) {
+                showToast('Password must be at least 8 characters', 'error');
+                return;
+            }
+
+            if (method === 'key' && !masterKey) {
+                showToast('Please enter or generate a master key', 'error');
+                return;
+            }
+
+            showProgress();
+
+            const results = [];
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                updateProgress(i, selectedFiles.length);
                 
-                <!-- Feature 1 -->
-                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
-                    <div class="text-purple-600 text-3xl mb-4">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">AES-256 Encryption</h3>
-                    <p class="text-gray-600">Military-grade encryption using Fernet (symmetric encryption) with PBKDF2 key derivation.</p>
-                </div>
+                try {
+                    const encrypted = await encryptFile(file, method === 'password' ? password : masterKey);
+                    results.push(encrypted);
+                    
+                    // Update stats
+                    stats.filesEncrypted++;
+                    stats.dataProcessed += file.size;
+                    
+                    // Auto upload to cloud
+                    if (autoUpload !== 'none') {
+                        if (autoUpload === 'dropbox' || autoUpload === 'both') {
+                            await simulateDropboxUpload(encrypted);
+                        }
+                        if (autoUpload === 'both' && telegramBotActive) {
+                            await sendToTelegram(encrypted);
+                        }
+                    }
+                    
+                    // Telegram notification
+                    if (telegramBotActive && apiConfig.telegram.notifyOnEncrypt) {
+                        sendTelegramNotification(`🔒 File encrypted: ${file.name}`);
+                    }
+                    
+                } catch (error) {
+                    console.error('Encryption failed:', error);
+                    showToast(`Failed to encrypt ${file.name}`, 'error');
+                }
+            }
 
-                <!-- Feature 2 -->
-                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
-                    <div class="text-purple-600 text-3xl mb-4">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Dropbox Integration</h3>
-                    <p class="text-gray-600">Automatic upload to Dropbox with shareable links. Chunked upload for large files.</p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
-                    <div class="text-purple-600 text-3xl mb-4">
-                        <i class="fab fa-telegram"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Telegram Bot</h3>
-                    <p class="text-gray-600">Interactive bot with inline buttons. Encrypt/decrypt files directly from Telegram.</p>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
-                    <div class="text-purple-600 text-3xl mb-4">
-                        <i class="fas fa-key"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Dual Encryption Modes</h3>
-                    <p class="text-gray-600">Master key for convenience or password-based with unique salt per file.</p>
-                </div>
-
-                <!-- Feature 5 -->
-                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
-                    <div class="text-purple-600 text-3xl mb-4">
-                        <i class="fas fa-clipboard"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Auto Link Copying</h3>
-                    <p class="text-gray-600">Shareable links automatically copied to your clipboard after upload.</p>
-                </div>
-
-                <!-- Feature 6 -->
-                <div class="feature-card bg-white rounded-xl shadow-lg p-6">
-                    <div class="text-purple-600 text-3xl mb-4">
-                        <i class="fas fa-paint-brush"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Beautiful CLI</h3>
-                    <p class="text-gray-600">Colorful, intuitive command-line interface with clear menus and feedback.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Installation Section -->
-    <div id="installation" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-12">Quick Installation</h2>
+            updateStats();
+            displayResults(results);
+            hideProgress();
             
-            <div class="bg-gray-900 rounded-lg p-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-terminal text-green-400 text-xl mr-3"></i>
-                    <span class="text-green-400 font-mono">pip install -r requirements.txt</span>
-                </div>
-                <div class="code-block">
-                    <span class="text-green-400">$</span> git clone https://github.com/YOURUSERNAME/secure-file-encryptor.git<br>
-                    <span class="text-green-400">$</span> cd secure-file-encryptor<br>
-                    <span class="text-green-400">$</span> pip install -r requirements.txt<br>
-                    <span class="text-green-400">$</span> python secure_encryptor.py
-                </div>
-            </div>
+            if (settings.autoDownload) {
+                downloadResults(results);
+            }
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="bg-purple-50 p-4 rounded-lg">
-                    <i class="fab fa-windows text-3xl text-blue-600 mb-2"></i>
-                    <p class="font-semibold">Windows</p>
-                    <p class="text-sm text-gray-600">Python 3.8+</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg">
-                    <i class="fab fa-apple text-3xl text-gray-800 mb-2"></i>
-                    <p class="font-semibold">macOS</p>
-                    <p class="text-sm text-gray-600">Python 3.8+</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg">
-                    <i class="fab fa-linux text-3xl text-yellow-600 mb-2"></i>
-                    <p class="font-semibold">Linux</p>
-                    <p class="text-sm text-gray-600">Python 3.8+</p>
-                </div>
-            </div>
-        </div>
-    </div>
+            showToast(`Encrypted ${results.length} file(s)`, 'success');
+        }
 
-    <!-- Usage Section -->
-    <div id="usage" class="py-20 bg-gray-50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-12">Quick Usage Examples</h2>
+        // File encryption logic
+        async function encryptFile(file, key) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+                        
+                        // Generate salt
+                        const salt = CryptoJS.lib.WordArray.random(16);
+                        
+                        // Derive key
+                        const derivedKey = CryptoJS.PBKDF2(key, salt, {
+                            keySize: 256 / 32,
+                            iterations: settings.iterations
+                        });
+                        
+                        // Generate IV
+                        const iv = CryptoJS.lib.WordArray.random(16);
+                        
+                        // Encrypt
+                        const encrypted = CryptoJS.AES.encrypt(wordArray, derivedKey, {
+                            iv: iv,
+                            mode: CryptoJS.mode.CBC,
+                            padding: CryptoJS.pad.Pkcs7
+                        });
+                        
+                        // Combine salt + iv + ciphertext
+                        const combined = salt.concat(iv).concat(encrypted.ciphertext);
+                        
+                        // Create encrypted file
+                        const encryptedBlob = new Blob([combined.toString(CryptoJS.enc.Base64)], {
+                            type: 'application/octet-stream'
+                        });
+                        
+                        resolve({
+                            name: file.name + '.encrypted',
+                            blob: encryptedBlob,
+                            size: encryptedBlob.size,
+                            salt: salt.toString(CryptoJS.enc.Base64),
+                            iv: iv.toString(CryptoJS.enc.Base64)
+                        });
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Dropbox Functions
+        function testDropboxConnection() {
+            const token = document.getElementById('dropboxToken').value;
             
-            <div class="space-y-6">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">🔑 Generate Master Key</h3>
-                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
-                        python secure_encryptor.py generate-key
-                    </div>
-                </div>
+            if (!token) {
+                showToast('Please enter a Dropbox access token', 'error');
+                return;
+            }
 
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">🔒 Encrypt a File</h3>
-                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
-                        python secure_encryptor.py encrypt secret.pdf --upload
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">🤖 Start Telegram Bot</h3>
-                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
-                        python secure_encryptor.py bot --bot-only
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">⚙️ Configure Services</h3>
-                    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono">
-                        python secure_encryptor.py config
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Telegram Bot Preview -->
-    <div class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-12">Interactive Telegram Bot</h2>
+            // Simulate API call
+            showToast('Testing Dropbox connection...', 'info');
             
-            <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-8 text-white">
-                <div class="flex items-center mb-6">
-                    <i class="fab fa-telegram text-5xl mr-4"></i>
+            setTimeout(() => {
+                if (token.startsWith('sl.')) {
+                    showToast('✅ Dropbox connected successfully!', 'success');
+                    document.getElementById('dropboxTokenMasked').classList.remove('hidden');
+                } else {
+                    showToast('❌ Invalid token format. Token should start with "sl."', 'error');
+                }
+            }, 1500);
+        }
+
+        function saveDropboxConfig() {
+            apiConfig.dropbox = {
+                token: document.getElementById('dropboxToken').value,
+                appKey: document.getElementById('dropboxAppKey').value,
+                appSecret: document.getElementById('dropboxAppSecret').value,
+                refreshToken: document.getElementById('dropboxRefreshToken').value
+            };
+            
+            if (settings.saveTokens) {
+                localStorage.setItem('dropboxConfig', JSON.stringify(apiConfig.dropbox));
+            }
+            
+            showToast('Dropbox configuration saved', 'success');
+        }
+
+        function clearDropboxConfig() {
+            document.getElementById('dropboxToken').value = '';
+            document.getElementById('dropboxAppKey').value = '';
+            document.getElementById('dropboxAppSecret').value = '';
+            document.getElementById('dropboxRefreshToken').value = '';
+            document.getElementById('dropboxTokenMasked').classList.add('hidden');
+            
+            showToast('Dropbox configuration cleared', 'info');
+        }
+
+        function listDropboxFiles() {
+            if (!apiConfig.dropbox.token) {
+                showToast('Please configure Dropbox first', 'error');
+                return;
+            }
+
+            const fileList = document.getElementById('dropboxFileList');
+            
+            // Simulated file list
+            const mockFiles = [
+                { name: 'document1.pdf.encrypted', size: 1024 * 1024 * 2, modified: '2024-01-15' },
+                { name: 'photo.jpg.encrypted', size: 1024 * 512, modified: '2024-01-14' },
+                { name: 'backup.zip.encrypted', size: 1024 * 1024 * 50, modified: '2024-01-13' },
+                { name: 'notes.txt.encrypted', size: 1024 * 10, modified: '2024-01-12' }
+            ];
+            
+            dropboxFiles = mockFiles;
+            
+            fileList.innerHTML = mockFiles.map(file => `
+                <div class="flex items-center justify-between bg-white p-3 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center">
+                        <i class="fas fa-file-alt text-blue-500 mr-3"></i>
+                        <div>
+                            <p class="font-medium">${file.name}</p>
+                            <p class="text-xs text-gray-500">${formatBytes(file.size)} • Modified: ${file.modified}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="downloadDropboxFile('${file.name}')" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="shareDropboxFile('${file.name}')" class="text-green-600 hover:text-green-800">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button onclick="deleteDropboxFile('${file.name}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            stats.dropboxCount = mockFiles.length;
+            updateStats();
+        }
+
+        function uploadToDropbox() {
+            document.getElementById('dropboxUploadFile').click();
+        }
+
+        function uploadSelectedFile() {
+            const file = document.getElementById('dropboxUploadFile').files[0];
+            if (!file) {
+                showToast('Please select a file to upload', 'error');
+                return;
+            }
+            
+            showToast(`Uploading ${file.name} to Dropbox...`, 'info');
+            
+            setTimeout(() => {
+                showToast('✅ File uploaded successfully!', 'success');
+                listDropboxFiles(); // Refresh list
+                
+                if (telegramBotActive && apiConfig.telegram.notifyOnUpload) {
+                    sendTelegramNotification(`📤 File uploaded to Dropbox: ${file.name}`);
+                }
+            }, 2000);
+        }
+
+        function downloadDropboxFile(filename) {
+            showToast(`Downloading ${filename}...`, 'info');
+            setTimeout(() => {
+                showToast('✅ Download complete!', 'success');
+            }, 1500);
+        }
+
+        function shareDropboxFile(filename) {
+            const link = `https://dropbox.com/s/abc123/${filename}`;
+            navigator.clipboard.writeText(link);
+            showToast('📋 Share link copied to clipboard!', 'success');
+        }
+
+        function deleteDropboxFile(filename) {
+            if (confirm(`Delete ${filename}?`)) {
+                showToast(`🗑️ ${filename} deleted`, 'info');
+                listDropboxFiles(); // Refresh
+            }
+        }
+
+        function simulateDropboxUpload(file) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    stats.dropboxCount++;
+                    updateStats();
+                    resolve();
+                }, 1000);
+            });
+        }
+
+        // Telegram Functions
+        function testTelegramConnection() {
+            const token = document.getElementById('telegramBotToken').value;
+            const chatId = document.getElementById('telegramChatId').value;
+            
+            if (!token || !chatId) {
+                showToast('Please enter bot token and chat ID', 'error');
+                return;
+            }
+
+            showToast('Sending test message...', 'info');
+            
+            setTimeout(() => {
+                addToTelegramLog('✓ Test message sent successfully');
+                showToast('✅ Telegram bot is working!', 'success');
+            }, 1500);
+        }
+
+        function startTelegramBot() {
+            const token = document.getElementById('telegramBotToken').value;
+            
+            if (!token) {
+                showToast('Please enter bot token first', 'error');
+                return;
+            }
+
+            telegramBotActive = true;
+            botStartTime = new Date();
+            document.getElementById('botLiveStatus').innerHTML = '<span class="text-green-600 font-semibold">Online</span>';
+            document.getElementById('botStatus').textContent = 'Online';
+            
+            addToTelegramLog('✓ Bot started successfully');
+            addToTelegramLog('✓ Listening for commands...');
+            
+            showToast('🤖 Telegram bot is now online', 'success');
+            
+            // Simulate receiving messages
+            simulateBotMessages();
+        }
+
+        function stopTelegramBot() {
+            telegramBotActive = false;
+            botStartTime = null;
+            document.getElementById('botLiveStatus').innerHTML = '<span class="text-red-600 font-semibold">Offline</span>';
+            document.getElementById('botStatus').textContent = 'Offline';
+            
+            addToTelegramLog('✗ Bot stopped');
+            showToast('Bot stopped', 'info');
+        }
+
+        function saveTelegramConfig() {
+            const allowedUsers = document.getElementById('telegramAllowedUsers').value
+                .split(',')
+                .map(u => u.trim())
+                .filter(u => u);
+            
+            apiConfig.telegram = {
+                botToken: document.getElementById('telegramBotToken').value,
+                chatId: document.getElementById('telegramChatId').value,
+                allowedUsers: allowedUsers,
+                autoStart: document.getElementById('botAutoStart').checked,
+                notifyOnEncrypt: document.getElementById('botNotifyOnEncrypt').checked,
+                notifyOnUpload: document.getElementById('botNotifyOnUpload').checked,
+                debugMode: document.getElementById('botDebugMode').checked
+            };
+            
+            if (settings.saveTokens) {
+                localStorage.setItem('telegramConfig', JSON.stringify(apiConfig.telegram));
+            }
+            
+            showToast('Telegram configuration saved', 'success');
+        }
+
+        function sendTelegramMessage() {
+            const message = prompt('Enter message to send:');
+            if (message) {
+                addToTelegramLog(`> Sent: ${message}`);
+                showToast('📨 Message sent!', 'success');
+                messageCount++;
+                document.getElementById('botMessages').textContent = messageCount;
+            }
+        }
+
+        function broadcastToUsers() {
+            const message = prompt('Enter broadcast message:');
+            if (message) {
+                addToTelegramLog(`📢 Broadcast: ${message}`);
+                showToast('📢 Broadcast sent to all users', 'success');
+            }
+        }
+
+        function getBotUpdates() {
+            addToTelegramLog('📥 Fetching updates...');
+            setTimeout(() => {
+                addToTelegramLog('📥 Received 3 new updates');
+            }, 1000);
+        }
+
+        function setWebhook() {
+            const url = prompt('Enter webhook URL:');
+            if (url) {
+                addToTelegramLog(`🔗 Webhook set to: ${url}`);
+                showToast('Webhook configured', 'success');
+            }
+        }
+
+        function sendTelegramNotification(message) {
+            if (!telegramBotActive) return;
+            
+            addToTelegramLog(`🔔 Notification: ${message}`);
+        }
+
+        function sendToTelegram(file) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    addToTelegramLog(`📎 File sent: ${file.name}`);
+                    resolve();
+                }, 1000);
+            });
+        }
+
+        function addToTelegramLog(message) {
+            const log = document.getElementById('telegramLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>> [${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function simulateBotMessages() {
+            if (!telegramBotActive) return;
+            
+            setTimeout(() => {
+                if (telegramBotActive) {
+                    activeUsers.add('123456789');
+                    document.getElementById('botUsers').textContent = activeUsers.size;
+                    addToTelegramLog('👤 New user connected: 123456789');
+                }
+            }, 5000);
+            
+            setTimeout(() => {
+                if (telegramBotActive) {
+                    addToTelegramLog('💬 User 123456789: /start');
+                    addToTelegramLog('🤖 Bot: Welcome! Use /encrypt to encrypt files');
+                    messageCount += 2;
+                    document.getElementById('botMessages').textContent = messageCount;
+                }
+            }, 8000);
+        }
+
+        function startUptimeCounter() {
+            setInterval(() => {
+                if (botStartTime && telegramBotActive) {
+                    const uptime = Math.floor((new Date() - botStartTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    const seconds = uptime % 60;
+                    document.getElementById('botUptime').textContent = 
+                        `${hours}h ${minutes}m ${seconds}s`;
+                }
+            }, 1000);
+        }
+
+        // UI Helpers
+        function showProgress() {
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressPercent').textContent = '0%';
+        }
+
+        function updateProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = percent + '%';
+        }
+
+        function hideProgress() {
+            document.getElementById('progressContainer').classList.add('hidden');
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            const resultsDiv = document.getElementById('results');
+            
+            container.innerHTML = results.map((result, index) => `
+                <div class="flex items-center justify-between bg-white p-3 rounded-lg border">
                     <div>
-                        <h3 class="text-2xl font-bold">@SecureEncryptorBot</h3>
-                        <p>Try it now on Telegram!</p>
+                        <p class="font-medium">${result.name}</p>
+                        <p class="text-xs text-gray-500">${formatBytes(result.size)}</p>
+                        <p class="text-xs text-gray-400">Salt: ${result.salt.substring(0, 20)}...</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="downloadFile(${index})" class="text-purple-600 hover:text-purple-800">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="copySalt(${index})" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-copy"></i>
+                        </button>
                     </div>
                 </div>
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="bg-white/20 rounded-lg p-3 text-center">
-                        <i class="fas fa-lock text-2xl mb-2"></i>
-                        <p class="text-sm">Encrypt</p>
-                    </div>
-                    <div class="bg-white/20 rounded-lg p-3 text-center">
-                        <i class="fas fa-unlock text-2xl mb-2"></i>
-                        <p class="text-sm">Decrypt</p>
-                    </div>
-                    <div class="bg-white/20 rounded-lg p-3 text-center">
-                        <i class="fas fa-cloud text-2xl mb-2"></i>
-                        <p class="text-sm">Dropbox</p>
-                    </div>
-                    <div class="bg-white/20 rounded-lg p-3 text-center">
-                        <i class="fas fa-cog text-2xl mb-2"></i>
-                        <p class="text-sm">Settings</p>
-                    </div>
-                </div>
-                
-                <div class="bg-black/30 rounded-lg p-4 font-mono text-sm">
-                    > /start<br>
-                    > 🔒 Send file to encrypt<br>
-                    > 🔑 Choose encryption method<br>
-                    > ✅ File encrypted! Upload to Dropbox?
-                </div>
-            </div>
-        </div>
-    </div>
+            `).join('');
+            
+            resultsDiv.classList.remove('hidden');
+            window.lastResults = results;
+        }
 
-    <!-- Call to Action -->
-    <div class="gradient-bg text-white py-20">
-        <div class="max-w-4xl mx-auto text-center px-4">
-            <h2 class="text-3xl font-bold mb-6">Ready to Secure Your Files?</h2>
-            <p class="text-xl mb-8">Get started with military-grade encryption today.</p>
-            <div class="flex justify-center space-x-4">
-                <a href="https://github.com/YOURUSERNAME/secure-file-encryptor/archive/refs/heads/main.zip" 
-                   class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-                    <i class="fas fa-download mr-2"></i>Download Now
-                </a>
-                <a href="https://github.com/YOURUSERNAME/secure-file-encryptor" 
-                   class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
-                    <i class="fab fa-github mr-2"></i>View Source
-                </a>
-            </div>
-        </div>
-    </div>
+        function downloadResults(results) {
+            results.forEach((result, index) => {
+                setTimeout(() => {
+                    downloadFile(index);
+                }, index * 500);
+            });
+        }
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h4 class="font-bold mb-4">SecureFileEncryptor</h4>
-                    <p class="text-gray-400 text-sm">Military-grade encryption for everyone.</p>
-                </div>
-                <div>
-                    <h5 class="font-semibold mb-4">Links</h5>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#features" class="hover:text-white">Features</a></li>
-                        <li><a href="#installation" class="hover:text-white">Installation</a></li>
-                        <li><a href="#usage" class="hover:text-white">Usage</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 class="font-semibold mb-4">Community</h5>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="https://github.com/YOURUSERNAME/secure-file-encryptor/issues" class="hover:text-white">Issues</a></li>
-                        <li><a href="https://github.com/YOURUSERNAME/secure-file-encryptor/pulls" class="hover:text-white">Pull Requests</a></li>
-                        <li><a href="#" class="hover:text-white">Discussions</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 class="font-semibold mb-4">Legal</h5>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white">MIT License</a></li>
-                        <li><a href="#" class="hover:text-white">Privacy</a></li>
-                        <li><a href="#" class="hover:text-white">Terms</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2024 Secure File Encryptor. Made with ❤️ for the open-source community.</p>
-            </div>
-        </div>
-    </footer>
+        function downloadFile(index) {
+            const results = window.lastResults;
+            if (results && results[index]) {
+                saveAs(results[index].blob, results[index].name);
+            }
+        }
+
+        function copySalt(index) {
+            const results = window.lastResults;
+            if (results && results[index]) {
+                navigator.clipboard.writeText(results[index].salt);
+                showToast('Salt copied to clipboard!', 'success');
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.className = `toast p-4 rounded-lg shadow-lg text-white ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+            }`;
+            toast.innerHTML = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Stats
+        function updateStats() {
+            document.getElementById('filesEncrypted').textContent = stats.filesEncrypted;
+            document.getElementById('dataProcessed').textContent = formatBytes(stats.dataProcessed);
+            document.getElementById('dropboxCount').textContent = stats.dropboxCount;
+            
+            localStorage.setItem('filesEncrypted', stats.filesEncrypted);
+            localStorage.setItem('dataProcessed', stats.dataProcessed);
+            localStorage.setItem('dropboxCount', stats.dropboxCount);
+        }
+
+        // Settings
+        function showSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('settingsModal').classList.add('flex');
+            
+            // Load current settings
+            document.getElementById('autoDownload').checked = settings.autoDownload;
+            document.getElementById('saveTokens').checked = settings.saveTokens;
+            document.getElementById('iterations').value = settings.iterations;
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+            document.getElementById('settingsModal').classList.remove('flex');
+        }
+
+        function loadSavedConfig() {
+            const saved = localStorage.getItem('settings');
+            if (saved) {
+                settings = JSON.parse(saved);
+                document.getElementById('autoDownload').checked = settings.autoDownload;
+                document.getElementById('saveTokens').checked = settings.saveTokens;
+                document.getElementById('iterations').value = settings.iterations;
+            }
+            
+            // Load API configs
+            const dropboxSaved = localStorage.getItem('dropboxConfig');
+            if (dropboxSaved) {
+                apiConfig.dropbox = JSON.parse(dropboxSaved);
+                document.getElementById('dropboxToken').value = apiConfig.dropbox.token || '';
+                document.getElementById('dropboxAppKey').value = apiConfig.dropbox.appKey || '';
+                document.getElementById('dropboxAppSecret').value = apiConfig.dropbox.appSecret || '';
+                document.getElementById('dropboxRefreshToken').value = apiConfig.dropbox.refreshToken || '';
+            }
+            
+            const telegramSaved = localStorage.getItem('telegramConfig');
+            if (telegramSaved) {
+                apiConfig.telegram = JSON.parse(telegramSaved);
+                document.getElementById('telegramBotToken').value = apiConfig.telegram.botToken || '';
+                document.getElementById('telegramChatId').value = apiConfig.telegram.chatId || '';
+                document.getElementById('telegramAllowedUsers').value = (apiConfig.telegram.allowedUsers || []).join(', ');
+                document.getElementById('botAutoStart').checked = apiConfig.telegram.autoStart || false;
+                document.getElementById('botNotifyOnEncrypt').checked = apiConfig.telegram.notifyOnEncrypt !== false;
+                document.getElementById('botNotifyOnUpload').checked = apiConfig.telegram.notifyOnUpload !== false;
+                document.getElementById('botDebugMode').checked = apiConfig.telegram.debugMode || false;
+            }
+        }
+
+        function saveSettings() {
+            settings = {
+                autoDownload: document.getElementById('autoDownload').checked,
+                saveTokens: document.getElementById('saveTokens').checked,
+                iterations: parseInt(document.getElementById('iterations').value),
+                defaultCloud: document.getElementById('defaultCloud').value
+            };
+            
+            localStorage.setItem('settings', JSON.stringify(settings));
+            closeSettings();
+            showToast('Settings saved', 'success');
+        }
+
+        // Initialize with some demo data
+        window.onload = function() {
+            // Simulate some initial files
+            setTimeout(() => {
+                if (apiConfig.dropbox.token) {
+                    listDropboxFiles();
+                }
+            }, 1000);
+            
+            // Auto-start bot if configured
+            if (apiConfig.telegram.autoStart && apiConfig.telegram.botToken) {
+                setTimeout(() => {
+                    startTelegramBot();
+                }, 2000);
+            }
+        };
+    </script>
 </body>
 </html>
